@@ -135,7 +135,7 @@ class buttons_main(object):
                 
                 for n in new:
                     l = capfile.get(n)
-                    n = "%s%s" %(local, l)
+                    n = "%s%s" %(fil, l)
                     self.add_files(gl, False, n)
 
     def add_file(self, gl, data ):
@@ -239,7 +239,7 @@ class buttons_main(object):
             for x in data:
                 if "Icon=" in x:
                     icon = x.split("=")[-1]
-                    if icon:
+                    if not icon == "\n":
                         icon = icon[:-1]
                     else:
                         icon = "none"
@@ -651,11 +651,11 @@ class buttons_main(object):
 
             bt = elm.Button(self.win)
             bt.text_set("Manual")
-            bt.disabled_set(True)
-            #~ if item:
-                #~ bt.callback_clicked_add(self.sys_cb)
-            #~ else:
-                #~ bt.callback_clicked_add(self.sys_cb)
+            #~ bt.disabled_set(True)
+            if item:
+                bt.callback_clicked_add(self.manual_win, path, vbox, item)
+            else:
+                bt.callback_clicked_add(self.manual_win, path, vbox)
             btnb.pack_end(bt)
             bt.show()
 
@@ -739,7 +739,41 @@ class buttons_main(object):
         ecore.Exe("mv '%s' '%s%s.desktop'" %(dest, local, path))
         vbox.delete()
         self.vipbox()
+        
+    def manual_win(self, bt, path, vbox, item=False):
+        if not item:
+            with open(path) as file:
+                data = file.readlines()
+            new = self.line_list()
+            data[1] = new[0]
+            del new[0]
+            data.extend(new)
+            with open(dest, 'w') as file:
+                file.writelines(data)
+            
+        vbox.delete()
 
+        vbox = elm.Box(self.win)
+        self.win.resize_object_add(vbox)
+        self.win.resize(380, 425)
+        vbox.padding_set(2, 2)
+        vbox.size_hint_weight_set(1.0, 1.0)
+        vbox.show()
+        
+        man = elm.Entry(self.win)
+        man.scrollable_set(True)
+        man.file_set(path, 0)
+            
+        
+
+    def editor_full(self, bt=False, vbox=False):
+        vbox.delete()
+        self.vipbox()
+    def creator_full(self, bt=False, vbox=False, dest=False):
+        ecore.Exe("rm '%s'" %dest)
+        vbox.delete()
+        self.vipbox()
+    
     def editor_close(self, bt=False, vbox=False):
         vbox.delete()
         self.vipbox()
