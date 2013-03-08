@@ -111,9 +111,32 @@ class buttons_main(object):
                 for f in files:
                     if "wine" in f:
                         files.remove(f)
-                files.sort()
+
+                name = ['one']
                 for f in files:
-                    self.add_files(gl, False, "%s%s"%(fil, f))
+                    location = "%s%s"%(fil, f)
+                    name = self.get_name(location, name)
+                
+                namefile = dict()
+                for i, n in enumerate(name):
+                    namefile.setdefault(n, files[i])
+                    
+                old = namefile.values()
+                new = old[:]
+                
+                for i, k in enumerate(new):
+                    new[i] = k.capitalize()
+                
+                capfile = dict()
+                for i, n in enumerate(new):
+                    capfile.setdefault(n, old[i])
+                    
+                new.sort()
+                
+                for n in new:
+                    l = capfile.get(n)
+                    n = "%s%s" %(local, l)
+                    self.add_files(gl, False, n)
 
     def add_file(self, gl, data ):
         itc = elm.GenlistItemClass(item_style="default",
@@ -122,15 +145,38 @@ class buttons_main(object):
 
         gl.item_append(itc, data, None)
 
+    def get_name(self, path, name=False):
+        with open(path) as file:
+            data = file.readlines()
+
+        for x in data:
+            full = " ".join(data)
+            if not "Name=" in full:
+                label = "None"
+                if name:
+                    if name[0] == one:
+                        name[0] = label
+                    else:
+                        name.append(label)
+                break
+            if "Name=" in x and not "GenericName=" in x:
+                label = x.split("=")[-1]
+                label = label[:-1]
+                if name:
+                    if name[0] == "one":
+                        name[0] = label
+                    else:
+                        name.append(label)
+                break
+        if name:
+            return name
+        else:
+            return label
+
     def name_return(self, obj, part, data ):
         path = data["fullpath"]
         label = ""
-        with open(path) as deskfile:
-            for x in deskfile:
-                if "Name=" in x and not "GenericName=" in x:
-                    label = x.split("=")[-1]
-                    label = label[:-1]
-                    break
+        label = self.get_name(path)
         cat = "None"
         with open(path) as deskfile:
             for x in deskfile:
@@ -187,15 +233,17 @@ class buttons_main(object):
             path = data['fullpath']
 
             icon = "none"
-            with open(path) as deskfile:
-                for x in deskfile:
-                    if "Icon=" in x:
-                        icon = x.split("=")[-1]
-                        if icon:
-                            icon = icon[:-1]
-                        else:
-                            icon = "none"
-                        break
+            with open(path) as file:
+                data = file.readlines()
+
+            for x in data:
+                if "Icon=" in x:
+                    icon = x.split("=")[-1]
+                    if icon:
+                        icon = icon[:-1]
+                    else:
+                        icon = "none"
+                    break
 
             ic = elm.Icon(self.win)
             ic.standard_set(icon)
