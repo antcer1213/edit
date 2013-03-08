@@ -1,0 +1,2 @@
+#!/bin/bash
+python /opt/eDit/edit.py

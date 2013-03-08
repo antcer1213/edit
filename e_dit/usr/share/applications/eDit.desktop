@@ -1,0 +1,13 @@
+[Desktop Entry]
+Hidden=false
+Exec=e_dit
+Icon=menu-editor
+Type=Application
+Categories=Application;Settings;
+NoDisplay=false
+StartupNotify=true
+Comment=A simple interface for launcher/menu editing.
+Terminal=false
+Name=eDit
+GenericName=Main Menu Editor
+Comment[en_US]=A simple interface for launcher/menu editing.
