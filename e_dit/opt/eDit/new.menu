@@ -1,0 +1,15 @@
+<!DOCTYPE Menu
+  PUBLIC '-//freedesktop//DTD Menu 1.0//EN'
+  'http://standards.freedesktop.org/menu-spec/menu-1.0.dtd'>
+<Menu>
+	<Name>Applications</Name>
+	<MergeFile type="parent">/etc/xdg/menus/applications.menu</MergeFile>
+	<Menu>
+		<Name>New</Name>
+		<Layout>
+			<Merge type="menus"/>
+			<Filename>Default.desktop</Filename>
+			<Merge type="files"/>
+		</Layout>
+	</Menu>
+</Menu>
