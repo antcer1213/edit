@@ -1,15 +1,51 @@
-<!DOCTYPE Menu
-  PUBLIC '-//freedesktop//DTD Menu 1.0//EN'
-  'http://standards.freedesktop.org/menu-spec/menu-1.0.dtd'>
+<!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"
+ "http://www.freedesktop.org/standards/menu-spec/1.0/menu.dtd">
+
+<!-- Parent menu -->
 <Menu>
-	<Name>Applications</Name>
-	<MergeFile type="parent">/etc/xdg/menus/applications.menu</MergeFile>
-	<Menu>
-		<Name>New</Name>
-		<Layout>
-			<Merge type="menus"/>
-			<Filename>Default.desktop</Filename>
-			<Merge type="files"/>
-		</Layout>
-	</Menu>
-</Menu>
+<!-- Name - Only for the .menu file's use -->
+<Name>Applications</Name> <!-- Default -->
+<!-- Directory - Displayed name and icon are taken from .directory file -->
+<Directory>lxde-menu-applications.directory</Directory> <!-- Default -->
+
+<!-- Read standard .directory, .desktop file locations and merged applications -->
+<DefaultAppDirs/> <!-- DO NOT TOUCH -->
+<DefaultDirectoryDirs/> <!-- DO NOT TOUCH -->
+<DefaultMergeDirs/> <!-- DO NOT TOUCH -->
+
+<!-- Include : Content to append to menu -->
+<!-- Used to show .desktop files in a Menu -->
+<!-- Can be removed if not needed(ex. Parent Menu) -->
+<Include>
+<!-- And : Item to include in Content -->
+<And>
+<!-- Category : Category to include as item -->
+<Category>Custom</Category>
+<!-- Not : Explicitly forbid Category -->
+<Not><Category>None</Category></Not>
+</And> <!-- End And -->
+</Include> <!-- End Include -->
+
+
+
+<!-- Custom submenu -->
+<Menu>
+<Name>Custom</Name>
+<Directory>custom.directory</Directory>
+
+<Include>
+<And>
+<Category>Custom</Category>
+<Not><Category>None</Category></Not>
+</And>
+</Include>
+
+</Menu> <!-- End Custom submenu -->
+
+
+
+<!-- Additional submenus here - Copy/Paste first submenu, then alter -->
+
+
+
+</Menu> <!-- End Parent menu -->
