@@ -5,7 +5,6 @@ import elementary as elm
 import evas
 import edje
 import ecore
-import mimetypes
 import dexml
 from dexml import fields
 

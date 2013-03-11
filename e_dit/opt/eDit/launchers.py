@@ -5,7 +5,6 @@ import elementary as elm
 import evas
 import edje
 import ecore
-import mimetypes
 from menuitem import MenuItem
 
 """eDit
@@ -759,6 +758,16 @@ class Launchers(object):
         vbox.pack_end(sc)
         sc.show()
 
+        self.fullpath = path
+        with open(path) as file:
+            data = file.readlines()
+        for i, x in enumerate(data):
+            try:
+                x = x.encode('utf-8')
+            except:
+                del data[i]
+        with open(path, 'w') as file:
+            file.writelines(data)
 
         man = self.man = elm.Entry(self.win)
         man.line_wrap_set(0)
