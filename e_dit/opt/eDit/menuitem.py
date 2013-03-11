@@ -113,6 +113,8 @@ class MenuItem(object):
                 for f in files:
                     if not f.endswith('.directory'):
                         files.remove(f)
+                if files == []:
+                    return
                 name = ['one']
                 for f in files:
                     location = "%s%s"%(fil, f)

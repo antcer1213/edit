@@ -105,6 +105,8 @@ class Launchers(object):
                 for f in files:
                     if "wine" in f and not f.endswith('.desktop'):
                         files.remove(f)
+                if files == []:
+                    return
                 name = ['one']
                 for f in files:
                     location = "%s%s"%(fil, f)

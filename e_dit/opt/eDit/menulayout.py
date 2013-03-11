@@ -116,6 +116,8 @@ class MenuLayout(object):
                 for f in files:
                     if not f.endswith('.menu'):
                         files.remove(f)
+                if files == []:
+                    return
                 files.sort()
                 for f in files:
                     if fil == system:
