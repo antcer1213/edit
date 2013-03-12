@@ -768,6 +768,11 @@ class Launchers(object):
                 x = x.encode('utf-8')
             except:
                 del data[i]
+        for i, x in enumerate(data):
+            try:
+                x = x.encode('utf-8')
+            except:
+                del data[i]
         with open(path, 'w') as file:
             file.writelines(data)
 
