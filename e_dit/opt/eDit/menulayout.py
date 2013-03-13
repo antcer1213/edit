@@ -164,8 +164,6 @@ class MenuLayout(object):
             f = elm.Box(self.win)
             f.horizontal_set(True)
             f.show()
-            sep = elm.Separator(self.win)
-            sep.show()
 
             ic = elm.Icon(self.win)
             ic.standard_set("text-xml")
@@ -174,7 +172,6 @@ class MenuLayout(object):
             ic.show()
 
             f.pack_end(ic)
-            f.pack_end(sep)
 
             return f
 

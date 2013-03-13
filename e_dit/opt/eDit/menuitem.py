@@ -197,8 +197,6 @@ class MenuItem(object):
             f = elm.Box(self.win)
             f.horizontal_set(True)
             f.show()
-            sep = elm.Separator(self.win)
-            sep.show()
 
             icon = "none"
             with open(path) as file:
@@ -223,7 +221,6 @@ class MenuItem(object):
             ic.show()
 
             f.pack_end(ic)
-            f.pack_end(sep)
 
             return f
 

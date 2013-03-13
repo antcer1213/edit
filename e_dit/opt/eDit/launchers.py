@@ -340,20 +340,25 @@ class Launchers(object):
         B = CatType[:]
         path = data["fullpath"]
         label = self.get_name(path)
-        cat = "Other"
-        with open(path) as deskfile:
-            for x in deskfile:
-                for i, a in enumerate(A):
-                    b = B[i]
-                    if b in x:
-                        cat = a
+        if self.viewcat:
+            pass
+        else:
+            cat = "Other"
+            with open(path) as deskfile:
+                for x in deskfile:
+                    for i, a in enumerate(A):
+                        b = B[i]
+                        if b in x:
+                            cat = a
+                            break
+                    if "Categories=\n" in x:
+                        cat = "None"
                         break
-                if "Categories=\n" in x:
-                    cat = "None"
-                    break
-
-        total = label+" - "+cat
-        return total
+        if self.viewcat:
+            return label
+        else:
+			total = label+" - "+cat
+			return total
 
     def icon_return(self, obj, part, data ):
         if part == "elm.swallow.icon":
