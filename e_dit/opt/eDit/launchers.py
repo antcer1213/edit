@@ -623,7 +623,7 @@ class Launchers(object):
         fr.content_set(en)
 
         fr = elm.Frame(self.win)
-        fr.text = "Generientryc Name:"
+        fr.text = "Generic Name:"
         fr.size_hint_weight_set(1.0, 0.0)
         fr.size_hint_align_set(-1.0, -1.0)
         vbox.pack_end(fr)
