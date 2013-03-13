@@ -22,7 +22,7 @@ system = "/usr/share/desktop-directories/"
 
 
 class MenuItem(object):
-    def __init__(self, tb=False, tbentry=False, win=False, vbox=False):
+    def __init__(self, tb=False, tbi=False, win=False, vbox=False):
 
 #----Main Window
         if vbox:

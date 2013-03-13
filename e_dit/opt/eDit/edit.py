@@ -2,7 +2,9 @@
 # encoding: utf-8
 import os
 import elementary as elm
+from ecore import Exe
 from launchers import Launchers
+from time import sleep
 
 """eDit
 
@@ -11,6 +13,16 @@ By: AntCer (bodhidocs@gmail.com)
 
 Started: March 4, 2013
 """
+HOME = os.getenv("HOME")
+CONFIG = "%s/.config/eDit/"%HOME
+
+#---Config Files
+if not os.path.isdir(CONFIG):
+    Exe("mkdir '%s'"%CONFIG)
+    sleep(10)
+if not os.path.exists("%sdefault.view"%CONFIG):
+    Exe("echo 'catview=False' > '%sdefault.view'"%CONFIG)
+    sleep(10)
 
 #---Start
 

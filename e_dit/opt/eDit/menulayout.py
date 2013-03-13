@@ -24,7 +24,7 @@ system = "/etc/xdg/menus/"
 
 
 class MenuLayout(object):
-    def __init__(self, tb=False, tbentry=False, win=False, vbox=False):
+    def __init__(self, tb=False, tbi=False, win=False, vbox=Falsez):
 
 #----Main Window
         if vbox:
