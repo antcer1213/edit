@@ -373,28 +373,16 @@ class Launchers(object):
                 path = data['fullpath']
                 split = path.split("/")
                 icon = "none"
-
-                if split[1] == "usr":
-                    with open(path) as file:
-                        data = file.readlines()
-                    for x in data:
-                        if "Icon=" in x:
-                            icon = x.split("=")[-1]
-                            if not icon == "\n":
-                                icon = icon[:-1]
-                            else:
-                                icon = "none"
-                else:
-                    with open(path) as file:
-                        data = file.readlines()
-                    for x in data:
-                        if "Icon=" in x:
-                            icon = x.split("=")[-1]
-                            if not icon == "\n":
-                                icon = icon[:-1]
-                            else:
-                                icon = "none"
-                            break
+                with open(path) as file:
+                    data = file.readlines()
+                for x in data:
+                    if "Icon=" in x:
+                        icon = x.split("=")[-1]
+                        if not icon == "\n":
+                            icon = icon[:-1]
+                        else:
+                            icon = "none"
+                        break
 
             ic = elm.Icon(self.win)
             if ic.standard_set(icon):
@@ -408,9 +396,10 @@ class Launchers(object):
             if 'icon' in data:
                 pass
             else:
-                sep = elm.Separator(self.win)
-                sep.show()
-                f.pack_end(sep)
+                if split[1] == "home" and self.viewcat:
+                    sep = elm.Separator(self.win)
+                    sep.show()
+                    f.pack_end(sep)
 
             return f
 
