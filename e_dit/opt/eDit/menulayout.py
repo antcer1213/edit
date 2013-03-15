@@ -84,7 +84,7 @@ class MenuLayout(object):
         tb.show()
 
         self.win.resize_object_add(vbox)
-        self.win.resize(410, 460)
+        self.win.resize(410, 503)
         self.win.show()
 
     def gl(self, tb=False, tbi=False, vbox=False):
@@ -279,7 +279,7 @@ class MenuLayout(object):
 
         vbox = elm.Box(self.win)
         self.win.resize_object_add(vbox)
-        self.win.resize(410, 460)
+        self.win.resize(410, 503)
         vbox.padding_set(2, 2)
         vbox.size_hint_weight_set(1.0, 1.0)
         vbox.show()
@@ -322,6 +322,31 @@ class MenuLayout(object):
         man.editable_set(True)
         man.scrollable_set(False)
         man.show()
+
+        lbb = elm.Box(self.win)
+        lbb.horizontal_set(True)
+        lbb.size_hint_weight_set(1.0, 0.0)
+        lbb.size_hint_align_set(-1.0, -1.0)
+        lbb.show()
+        vbox.pack_end(lbb)
+
+        bt = elm.Button(self.win)
+        bt.text = "File Path:"
+        bt.size_hint_weight_set(0.0, 1.0)
+        bt.size_hint_align_set(-1.0, -1.0)
+        bt.disabled_set(True)
+        lbb.pack_end(bt)
+        bt.show()
+
+        en = elm.Entry(self.win)
+        en.text = path
+        en.editable_set(False)
+        en.single_line = True
+        en.scrollable_set(True)
+        en.size_hint_weight_set(1.0, 1.0)
+        en.size_hint_align_set(-1.0, -1.0)
+        lbb.pack_end(en)
+        en.show()
 
         btnb = elm.Box(self.win)
         btnb.horizontal_set(True)
@@ -473,7 +498,7 @@ class MenuLayout(object):
 
         vbox = elm.Box(self.win)
         self.win.resize_object_add(vbox)
-        self.win.resize(410, 460)
+        self.win.resize(410, 503)
         vbox.padding_set(0 , 5)
         vbox.size_hint_weight_set(1.0, 1.0)
         vbox.show()

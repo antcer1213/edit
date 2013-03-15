@@ -5,6 +5,7 @@ import elementary as elm
 import evas
 import edje
 import ecore
+from time import sleep
 from menuitem import MenuItem
 
 """eDit
@@ -18,16 +19,16 @@ Started: March 4, 2013
 HOME = os.getenv("HOME")
 CONFIG = "%s/.config/eDit"%HOME
 VIEW = "%s/default.view"%CONFIG
-local = "%s/.local/share/applications/" %HOME
-system = "/usr/share/applications/"
-CatName = ['Games', 'Sound & Video', 'Graphics', 'Internet', 'Accessories', 'Office', 'System Tools', 'Programming', 'Education', 'Preferences']
-CatType = ['Game;', 'AudioVideo;', 'Graphics;', 'Network;', 'Utility;', 'Office;', 'System;', 'Development;', 'Education;', 'Settings;']
+LOCAL = "%s/.local/share/applications/" %HOME
+SYSTEM = "/usr/share/applications/"
+CATNAME = ['Games', 'Sound & Video', 'Graphics', 'Internet', 'Accessories', 'Office', 'System Tools', 'Programming', 'Education', 'Preferences']
+CATTYPE = ['Game;', 'AudioVideo;', 'Graphics;', 'Network;', 'Utility;', 'Office;', 'System;', 'Development;', 'Education;', 'Settings;']
 
 
 class Launchers(object):
     def __init__(self, tb=False, tbi=False, win=False, vbox=False):
         self.A = False
-                
+
         with open(VIEW) as file:
             self.viewmode = file.readlines()
         viewmode  = self.viewmode[0].split("=")[-1]
@@ -75,7 +76,7 @@ class Launchers(object):
 
         self.separator(vbox)
         self.gl(None, None, vbox, self.viewcat)
-        self.add_files(self.maingl, None, local)
+        self.add_files(self.maingl, None, LOCAL)
         tbview.item_append("", "Normal View", self.gl, False, False)
         tbview.item_append("", "Category View", self.gl, False, True)
         tbview.item_append("", "Preferences", self.preferences)
@@ -96,7 +97,7 @@ class Launchers(object):
         tb.show()
 
         self.win.resize_object_add(vbox)
-        self.win.resize(410, 460)
+        self.win.resize(410, 503)
         self.win.show()
 
     def gl(self, tb=False, tbi=False, vbox=False, viewcat=False):
@@ -107,7 +108,7 @@ class Launchers(object):
                 self.categoryview()
             else:
                 self.viewcat = False
-            self.add_files(self.maingl, None, local)
+            self.add_files(self.maingl, None, LOCAL)
         else:
             gl = self.maingl = elm.Genlist(self.win)
             gl.size_hint_weight_set(1.0, 1.0)
@@ -126,73 +127,73 @@ class Launchers(object):
 
     def categoryview(self):
         catdata = {'name':'Accessories', 'cat':'Utility;', 'icon':'applications-accessories'}
-        itpc = elm.GenlistItemClass(item_style="default", 
+        itpc = elm.GenlistItemClass(item_style="default",
                 text_get_func=self.cat_return,
                 content_get_func=self.icon_return)
         self.A = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
 
         catdata = {'name':'Preferences', 'cat':'Settings;', 'icon':'preferences-desktop'}
-        itpc = elm.GenlistItemClass(item_style="default", 
+        itpc = elm.GenlistItemClass(item_style="default",
                 text_get_func=self.cat_return,
                 content_get_func=self.icon_return)
         self.B = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
 
         catdata = {'name':'Programming', 'cat':'Development;', 'icon':'applications-development'}
-        itpc = elm.GenlistItemClass(item_style="default", 
+        itpc = elm.GenlistItemClass(item_style="default",
                 text_get_func=self.cat_return,
                 content_get_func=self.icon_return)
         self.C = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
-     
+
         catdata = {'name':'Education', 'cat':'Education;', 'icon':'applications-science'}
-        itpc = elm.GenlistItemClass(item_style="default", 
+        itpc = elm.GenlistItemClass(item_style="default",
                 text_get_func=self.cat_return,
                 content_get_func=self.icon_return)
         self.D = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
 
         catdata = {'name':'Games', 'cat':'Game;', 'icon':'applications-games'}
-        itpc = elm.GenlistItemClass(item_style="default", 
+        itpc = elm.GenlistItemClass(item_style="default",
                 text_get_func=self.cat_return,
                 content_get_func=self.icon_return)
         self.E = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
 
         catdata = {'name':'Graphics', 'cat':'Graphics;', 'icon':'applications-graphics'}
-        itpc = elm.GenlistItemClass(item_style="default", 
+        itpc = elm.GenlistItemClass(item_style="default",
                 text_get_func=self.cat_return,
                 content_get_func=self.icon_return)
         self.F = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
 
         catdata = {'name':'Internet', 'cat':'Network;', 'icon':'applications-internet'}
-        itpc = elm.GenlistItemClass(item_style="default", 
+        itpc = elm.GenlistItemClass(item_style="default",
                 text_get_func=self.cat_return,
                 content_get_func=self.icon_return)
         self.G = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
 
         catdata = {'name':'Sound & Video', 'cat':'AudioVideo;', 'icon':'applications-multimedia'}
-        itpc = elm.GenlistItemClass(item_style="default", 
+        itpc = elm.GenlistItemClass(item_style="default",
                 text_get_func=self.cat_return,
                 content_get_func=self.icon_return)
         self.H = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
 
         catdata = {'name':'Office', 'cat':'Office;', 'icon':'applications-office'}
-        itpc = elm.GenlistItemClass(item_style="default", 
+        itpc = elm.GenlistItemClass(item_style="default",
                 text_get_func=self.cat_return,
                 content_get_func=self.icon_return)
         self.I = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
 
         catdata = {'name':'Other', 'cat':';', 'icon':'applications-other'}
-        itpc = elm.GenlistItemClass(item_style="default", 
+        itpc = elm.GenlistItemClass(item_style="default",
                 text_get_func=self.cat_return,
                 content_get_func=self.icon_return)
         self.J = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
 
         catdata = {'name':'System Tools', 'cat':'System;', 'icon':'applications-system'}
-        itpc = elm.GenlistItemClass(item_style="default", 
+        itpc = elm.GenlistItemClass(item_style="default",
                 text_get_func=self.cat_return,
                 content_get_func=self.icon_return)
         self.K = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
 
         catdata = {'name':'Uncategorized', 'cat':'None;', 'icon':'none'}
-        itpc = elm.GenlistItemClass(item_style="default", 
+        itpc = elm.GenlistItemClass(item_style="default",
                 text_get_func=self.cat_return,
                 content_get_func=self.icon_return)
         self.L = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
@@ -207,9 +208,9 @@ class Launchers(object):
                 split = fil.split("/")
                 fil = os.path.basename(fil);fil = os.path.splitext(fil)[0]
                 data['name'] = fil
-                
-                A = CatName[:]
-                B = CatType[:]
+
+                A = CATNAME[:]
+                B = CATTYPE[:]
                 cat = "Other"
                 with open(copy) as deskfile:
                     for x in deskfile:
@@ -254,8 +255,8 @@ class Launchers(object):
                     self.add_files(gl, False, n)
 
     def add_file(self, gl, data, cat):
-        itc = elm.GenlistItemClass(item_style="default", 
-                            text_get_func=self.name_return, 
+        itc = elm.GenlistItemClass(item_style="default",
+                            text_get_func=self.name_return,
                             content_get_func=self.icon_return)
         path = data['fullpath']
         split = path.split("/")
@@ -267,26 +268,37 @@ class Launchers(object):
             return
         if cat == self.A.data['name']:
             gl.item_append(itc, data, self.A)
+            return
         elif cat == self.B.data['name']:
             gl.item_append(itc, data, self.B)
+            return
         elif cat == self.C.data['name']:
             gl.item_append(itc, data, self.C)
+            return
         elif cat == self.D.data['name']:
             gl.item_append(itc, data, self.D)
+            return
         elif cat == self.E.data['name']:
             gl.item_append(itc, data, self.E)
+            return
         elif cat == self.F.data['name']:
             gl.item_append(itc, data, self.F)
+            return
         elif cat == self.G.data['name']:
             gl.item_append(itc, data, self.G)
+            return
         elif cat == self.H.data['name']:
             gl.item_append(itc, data, self.H)
+            return
         elif cat == self.I.data['name']:
             gl.item_append(itc, data, self.I)
+            return
         elif cat == self.J.data['name']:
             gl.item_append(itc, data, self.J)
+            return
         elif cat == self.K.data['name']:
             gl.item_append(itc, data, self.K)
+            return
         else:
             gl.item_append(itc, data, self.L)
 
@@ -320,8 +332,8 @@ class Launchers(object):
             return label
 
     def cat_return(self, obj, part, data ):
-        A = CatName[:]
-        B = CatType[:]
+        A = CATNAME[:]
+        B = CATTYPE[:]
         C = dict(zip(B,A))
         category = data['cat']
         if category == 'None;':
@@ -336,8 +348,8 @@ class Launchers(object):
         return cat
 
     def name_return(self, obj, part, data ):
-        A = CatName[:]
-        B = CatType[:]
+        A = CATNAME[:]
+        B = CATTYPE[:]
         path = data["fullpath"]
         label = self.get_name(path)
         if self.viewcat:
@@ -365,7 +377,7 @@ class Launchers(object):
             f = elm.Box(self.win)
             f.horizontal_set(True)
             f.show()
-            
+
             if 'icon' in data:
                 icon = data['icon']
                 #~ icon = "none"
@@ -408,9 +420,9 @@ class Launchers(object):
         if item:
             path = item.data["fullpath"]
             name = item.data["name"]
-            newpath = "%s%s.desktop" %(local, name)
+            newpath = "%s%s.desktop" %(LOCAL, name)
             if not os.path.exists(newpath):
-                ecore.Exe("cp '%s' '%s'" %(path, local))
+                ecore.Exe("cp '%s' '%s'" %(path, LOCAL))
                 ecore.Timer(0.3, self.add_files, self.maingl, None, newpath)
 
 #-----------INNER WINDOWS
@@ -467,11 +479,11 @@ class Launchers(object):
         rdb.pack_end(rd)
         rd.show()
 
-        if self.viewcat:
+        viewmode = self.viewmode[0].split("=")[-1]
+        if viewmode == "True":
             self.rdg.value_set(2)
         else:
             self.rdg.value_set(1)
-
 
         fil = elm.Box(self.win)
         fil.size_hint_weight_set(1.0, 1.0)
@@ -529,9 +541,24 @@ class Launchers(object):
         vbox.pack_end(tb)
         tb.show()
 
-        self.add_files(gl, None, system)
+        self.add_files(gl, None, SYSTEM)
 
     def editor_core(self, tb, tbi, vbox, item=None, n=False):
+        def new():
+            num = '0123456789'
+            dest = "%sdefault" %LOCAL
+            copy = dest[:]
+            for x in num:
+                dest.strip('-0123456789')
+                dest = dest + "-" + x
+                newpath = "%s.desktop" %dest
+                if not os.path.exists(newpath):
+                    ecore.Exe("echo '[Desktop Entry]' > %s" %newpath)
+                    ecore.Exe("echo 'Name=Default' >> %s" %newpath)
+                    break
+                else:
+                    dest = copy
+            return newpath
         if n:
             self.n.delete()
         if item:
@@ -540,10 +567,10 @@ class Launchers(object):
             else:
                 path = item
         else:
-            dest = "%sblank.desktop" %local
-            ecore.Exe("echo '[Desktop Entry]' > %s" %dest)
-            ecore.Exe("echo 'Name=Default' >> %s" %dest)
-            path = "%sblank.desktop" %local
+            path = dest = new()
+            sleep(10)
+            pathname = os.path.basename(path)
+            pathname = os.path.splitext(pathname)[0]
 
         name  = "";gen   = "";exe   = "";icon  = "";mime  = "";cat   = "";com   = "";hide  = "";nodis = "";start = "";term  = ""
         h = self.h = "false";n = self.n = "false";s = self.s = "false";t = self.t = "false"
@@ -597,7 +624,7 @@ class Launchers(object):
 
         vbox = elm.Box(self.win)
         self.win.resize_object_add(vbox)
-        self.win.resize(410, 460)
+        self.win.resize(410, 503)
         vbox.padding_set(2, 2)
         vbox.size_hint_weight_set(1.0, 1.0)
         vbox.show()
@@ -740,7 +767,7 @@ class Launchers(object):
         hs = self.hs = elm.Hoversel(self.win)
         hs.hover_parent_set(self.win)
         hs.text_set("Category:")
-        self.a = hs.item_add('Accessories'); self.b = hs.item_add('Graphics'); self.c = hs.item_add('Internet'); self.d = hs.item_add('Preferences'); self.e = hs.item_add('Programming'); self.f = hs.item_add('Education'); self.g = hs.item_add('Games'); self.h = hs.item_add('Sound & Video'); self.i = hs.item_add('Office'); self.j = hs.item_add('System Tools');
+        self.a = hs.item_add('Accessories'); self.d = hs.item_add('Preferences'); self.e = hs.item_add('Programming'); self.f = hs.item_add('Education'); self.g = hs.item_add('Games'); self.b = hs.item_add('Graphics'); self.c = hs.item_add('Internet'); self.h = hs.item_add('Sound & Video'); self.i = hs.item_add('Office'); self.j = hs.item_add('System Tools');
         hs.callback_selected_add(ch)
         hs.size_hint_weight_set(0.5, 0.0)
         hs.size_hint_align_set(-1.0, -1.0)
@@ -756,20 +783,12 @@ class Launchers(object):
         cb.pack_end(en)
         en.show()
 
-        pl = elm.Panel(self.win)
-        pl.hidden_set(False)
-        pl.orient_set(elm.ELM_PANEL_ORIENT_LEFT)
-        pl.size_hint_weight_set(1.0, 1.0)
-        pl.size_hint_align_set(-1.0, -1.0)
-
         lbb = elm.Box(self.win)
         lbb.horizontal_set(True)
         lbb.size_hint_weight_set(1.0, 1.0)
         lbb.size_hint_align_set(-1.0, -1.0)
-        pl.content_set(lbb)
         lbb.show()
-        vbox.pack_end(pl)
-        pl.show()
+        vbox.pack_end(lbb)
 
         bt = elm.Button(self.win)
         if item:
@@ -787,7 +806,7 @@ class Launchers(object):
             en.text = path
             en.editable_set(False)
         else:
-            en.text = "Default"
+            en.text = pathname
             en.editable_set(True)
         en.single_line = True
         en.scrollable_set(True)
@@ -796,22 +815,12 @@ class Launchers(object):
         lbb.pack_end(en)
         en.show()
 
-        self.separator(lbb)
-
-        pl = elm.Panel(self.win)
-        pl.hidden_set(False)
-        pl.orient_set(elm.ELM_PANEL_ORIENT_LEFT)
-        pl.size_hint_weight_set(1.0, 1.0)
-        pl.size_hint_align_set(-1.0, -1.0)
-
         chks = elm.Box(self.win)
         chks.horizontal_set(True)
         chks.size_hint_weight_set(1.0, 1.0)
         chks.size_hint_align_set(-1.0, -1.0)
-        pl.content_set(chks)
         chks.show()
-        vbox.pack_end(pl)
-        pl.show()
+        vbox.pack_end(chks)
 
         ck = self.hide = elm.Check(self.win)
         ck.text_set("Hidden")
@@ -966,7 +975,7 @@ class Launchers(object):
         with open(dest, 'w') as file:
             file.writelines(data)
 
-        ecore.Exe("mv '%s' '%s%s.desktop'" %(dest, local, path))
+        ecore.Exe("mv '%s' '%s%s.desktop'" %(dest, LOCAL, path))
         vbox.delete()
         self.vipbox()
 
@@ -988,7 +997,7 @@ class Launchers(object):
 
         vbox = elm.Box(self.win)
         self.win.resize_object_add(vbox)
-        self.win.resize(410, 460)
+        self.win.resize(410, 503)
         vbox.padding_set(0 , 5)
         vbox.size_hint_weight_set(1.0, 1.0)
         vbox.show()
@@ -1000,7 +1009,7 @@ class Launchers(object):
     def dubclick(self, maingl, item):
         if 'fullpath' in item.data:
             path = item.data['fullpath']
-    
+
             box = elm.Box(self.win)
             box.padding_set(0 , 5)
             box.size_hint_weight_set(1.0, 1.0)
@@ -1014,17 +1023,43 @@ class Launchers(object):
             val = 1
             self.desktop_file(path, box, item, val)
 
-
     def desktop_file(self, path, vbox, item, val=None):
-        sc = elm.Scroller(self.win)
-        sc.size_hint_align_set(-1.0, -1.0)
-        sc.size_hint_weight_set(1.0, 1.0)
-        sc.policy_set(True, True)
-        vbox.pack_end(sc)
-        sc.show()
-
         if val:
-            pass
+            with open(path) as deskfile:
+                for x in deskfile:
+                    if "Icon=" in x:
+                        icon = x.split("=")[-1]
+
+            ib = elm.Box(self.win)
+            ib.size_hint_weight_set(1.0, 0.5)
+            ib.size_hint_align_set(-1.0, -1.0)
+            vbox.pack_end(ib)
+            ib.show()
+
+            fr = elm.Frame(self.win)
+            fr.text = "Icon:"
+            fr.size_hint_weight_set(1.0, 0.0)
+            fr.size_hint_align_set(-1.0, -1.0)
+            ib.pack_end(fr)
+            fr.show()
+
+            ic = self.ic = elm.Icon(self.win)
+            en = self.icon = elm.Entry(self.win)
+            en.text = icon
+            en.scrollable_set(True)
+            en.editable_set(False)
+            en.single_line = True
+            fr.content_set(en)
+
+            icon = icon[:-1]
+            if ic.standard_set(icon):
+                pass
+            else:
+                ic.standard_set("none")
+            ic.size_hint_weight_set(1.0, 1.0)
+            ic.size_hint_align_set(-1.0, -1.0)
+            ic.show()
+            ib.pack_end(ic)
         else:
             self.fullpath = path
             with open(path) as file:
@@ -1036,6 +1071,13 @@ class Launchers(object):
                     del data[i]
             with open(path, 'w') as file:
                 file.writelines(data)
+
+        sc = elm.Scroller(self.win)
+        sc.size_hint_align_set(-1.0, -1.0)
+        sc.size_hint_weight_set(1.0, 1.0)
+        sc.policy_set(True, True)
+        vbox.pack_end(sc)
+        sc.show()
 
         man = self.man = elm.Entry(self.win)
         man.line_wrap_set(0)

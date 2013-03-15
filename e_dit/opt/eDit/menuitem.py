@@ -81,7 +81,7 @@ class MenuItem(object):
         tb.show()
 
         self.win.resize_object_add(vbox)
-        self.win.resize(410, 460)
+        self.win.resize(410, 503)
         self.win.show()
 
     def gl(self, tb=False, tbi=False, vbox=False):
@@ -339,7 +339,7 @@ class MenuItem(object):
 
         vbox = elm.Box(self.win)
         self.win.resize_object_add(vbox)
-        self.win.resize(410, 460)
+        self.win.resize(410, 503)
         vbox.padding_set(2, 2)
         vbox.size_hint_weight_set(1.0, 1.0)
         vbox.show()
@@ -411,7 +411,7 @@ class MenuItem(object):
         fr.content_set(en)
 
         fr = elm.Frame(self.win)
-        fr.text = "Path Name(no suffix):"
+        fr.text = "File Name(no suffix):"
         fr.size_hint_weight_set(1.0, 0.0)
         fr.size_hint_align_set(-1.0, -1.0)
         vbox.pack_end(fr)
@@ -428,6 +428,31 @@ class MenuItem(object):
         fil.size_hint_align_set(-1.0, -1.0)
         vbox.pack_end(fil)
         fil.show()
+
+        lbb = elm.Box(self.win)
+        lbb.horizontal_set(True)
+        lbb.size_hint_weight_set(1.0, 0.0)
+        lbb.size_hint_align_set(-1.0, -1.0)
+        lbb.show()
+        vbox.pack_end(lbb)
+
+        bt = elm.Button(self.win)
+        bt.text = "File Path:"
+        bt.size_hint_weight_set(0.0, 1.0)
+        bt.size_hint_align_set(-1.0, -1.0)
+        bt.disabled_set(True)
+        lbb.pack_end(bt)
+        bt.show()
+
+        en = elm.Entry(self.win)
+        en.text = path
+        en.editable_set(False)
+        en.single_line = True
+        en.scrollable_set(True)
+        en.size_hint_weight_set(1.0, 1.0)
+        en.size_hint_align_set(-1.0, -1.0)
+        lbb.pack_end(en)
+        en.show()
 
         btnb = elm.Box(self.win)
         btnb.horizontal_set(True)
@@ -580,7 +605,7 @@ class MenuItem(object):
 
         vbox = elm.Box(self.win)
         self.win.resize_object_add(vbox)
-        self.win.resize(410, 460)
+        self.win.resize(410, 503)
         vbox.padding_set(0 , 5)
         vbox.size_hint_weight_set(1.0, 1.0)
         vbox.show()
@@ -607,6 +632,43 @@ class MenuItem(object):
 
 
     def desktop_file(self, path, vbox, item, val=None):
+        if val:
+            with open(path) as deskfile:
+                for x in deskfile:
+                    if "Icon=" in x:
+                        icon = x.split("=")[-1]
+
+            ib = elm.Box(self.win)
+            ib.size_hint_weight_set(1.0, 0.5)
+            ib.size_hint_align_set(-1.0, -1.0)
+            vbox.pack_end(ib)
+            ib.show()
+
+            fr = elm.Frame(self.win)
+            fr.text = "Icon:"
+            fr.size_hint_weight_set(1.0, 0.0)
+            fr.size_hint_align_set(-1.0, -1.0)
+            ib.pack_end(fr)
+            fr.show()
+
+            ic = self.ic = elm.Icon(self.win)
+            en = self.icon = elm.Entry(self.win)
+            en.text = icon
+            en.scrollable_set(True)
+            en.editable_set(False)
+            en.single_line = True
+            fr.content_set(en)
+
+            icon = icon[:-1]
+            if ic.standard_set(icon):
+                pass
+            else:
+                ic.standard_set("none")
+            ic.size_hint_weight_set(1.0, 1.0)
+            ic.size_hint_align_set(-1.0, -1.0)
+            ic.show()
+            ib.pack_end(ic)
+
         sc = elm.Scroller(self.win)
         sc.size_hint_align_set(-1.0, -1.0)
         sc.size_hint_weight_set(1.0, 1.0)
