@@ -1036,22 +1036,8 @@ class Launchers(object):
             vbox.pack_end(ib)
             ib.show()
 
-            fr = elm.Frame(self.win)
-            fr.text = "Icon:"
-            fr.size_hint_weight_set(1.0, 0.0)
-            fr.size_hint_align_set(-1.0, -1.0)
-            ib.pack_end(fr)
-            fr.show()
-
-            ic = self.ic = elm.Icon(self.win)
-            en = self.icon = elm.Entry(self.win)
-            en.text = icon
-            en.scrollable_set(True)
-            en.editable_set(False)
-            en.single_line = True
-            fr.content_set(en)
-
             icon = icon[:-1]
+            ic = self.ic = elm.Icon(self.win)
             if ic.standard_set(icon):
                 pass
             else:

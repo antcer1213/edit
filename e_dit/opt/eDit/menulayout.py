@@ -240,7 +240,7 @@ class MenuLayout(object):
 
         self.add_files(gl, None, system)
 
-    def editor_core(self, tb=None, tbi=None, vbox=None, item=None, n=None):
+    def editor_core(self, tb=None, tbi=None, vbox=None, item=None, n=None, chk=None):
         def new():
             num = '0123456789'
             dest = "%snew" %local
@@ -272,7 +272,7 @@ class MenuLayout(object):
             n.allow_events_set(False)
             n.show()
             path = new()
-            ecore.Timer(1.0, self.editor_core, None, None, vbox, path, n)
+            ecore.Timer(1.0, self.editor_core, None, None, vbox, path, n, 1)
             return
 
         vbox.delete()
@@ -354,7 +354,7 @@ class MenuLayout(object):
         vbox.pack_end(btnb)
         btnb.show()
 
-        if item:
+        if not chk:
             val = 1
             bt = elm.Button(self.win)
             bt.size_hint_weight_set(1.0, 1.0)
@@ -366,7 +366,7 @@ class MenuLayout(object):
         bt = elm.Button(self.win)
         bt.size_hint_weight_set(1.0, 1.0)
         bt.text_set("Manual")
-        if item:
+        if not chk:
             bt.callback_clicked_add(self.manual_win, path, vbox, item)
         else:
             bt.callback_clicked_add(self.manual_win, path, vbox)
@@ -376,14 +376,14 @@ class MenuLayout(object):
         tb = elm.Toolbar(self.win)
         tb.size_hint_weight_set(1.0, 0.0)
         tb.size_hint_align_set(-1.0, -1.0)
-        if item:
+        if not chk:
             tb.item_append("", "Done", self.editor_save, vbox)
         else:
-            tb.item_append("", "Create", self.creator_create, vbox, dest)
-        if item:
+            tb.item_append("", "Create", self.editor_save, vbox)
+        if not chk:
             tb.item_append("", "Cancel", self.editor_close, vbox)
         else:
-            tb.item_append("", "Cancel", self.creator_close, vbox, dest)
+            tb.item_append("", "Cancel", self.creator_close, vbox, path)
         tb.homogeneous_set(True)
         tb.select_mode_set(2)
         vbox.pack_end(tb)
