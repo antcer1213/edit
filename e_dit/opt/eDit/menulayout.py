@@ -6,6 +6,7 @@ import evas
 import edje
 import ecore
 import dexml
+from time import sleep
 from dexml import fields
 
 
@@ -18,15 +19,14 @@ Started: March 4, 2013
 """
 
 HOME = os.getenv("HOME")
-local = "%s/.config/menus/" %HOME
-system = "/etc/xdg/menus/"
+LOCAL = "%s/.config/menus/" %HOME
+SYSTEM = "/etc/xdg/menus/"
+NUM = '0123456789'
 
 
 
 class MenuLayout(object):
-    def __init__(self, tb=False, tbi=False, win=False, vbox=False):
-
-#----Main Window
+    def __init__(self, tb, tbi, win, vbox=False):
         if vbox:
             vbox.delete()
 
@@ -34,10 +34,10 @@ class MenuLayout(object):
 
         self.vipbox()
 
+#----------------------MAIN WINDOW
     def vipbox(self):
         from edit import Launchers
         from menuitem import MenuItem
-
 
         vbox = self.vbox = elm.Box(self.win)
         vbox.padding_set(5, 0)
@@ -66,16 +66,15 @@ class MenuLayout(object):
 
         self.separator(vbox)
         self.gl(None, None, vbox)
-        self.add_files(self.maingl, None, local)
+        self.add_files(self.maingl, LOCAL)
         self.separator(vbox)
 
-        item = "None"
         tb = elm.Toolbar(self.win)
         tb.size_hint_weight_set(1.0, 0.0)
         tb.size_hint_align_set(-1.0, -1.0)
         tb.item_append("", "Add", self.system_launcher)
         tb.item_append("", "Edit", self.editor, vbox)
-        tb.item_append("", "Create", self.editor_core, vbox)
+        tb.item_append("", "Create", self.creator, vbox)
         tb.item_append("", "Remove", self.rm_popup)
         tb.item_append("", "Refresh", self.gl, vbox)
         tb.homogeneous_set(True)
@@ -87,61 +86,71 @@ class MenuLayout(object):
         self.win.resize(410, 503)
         self.win.show()
 
+
+#----------------------MAIN LIST
     def gl(self, tb=False, tbi=False, vbox=False):
         if tb:
             self.maingl.clear()
-            self.add_files(self.maingl, None, local)
+            self.add_files(self.maingl, LOCAL)
         else:
             gl = self.maingl = elm.Genlist(self.win)
             gl.size_hint_weight_set(1.0, 1.0)
             gl.size_hint_align_set(-1.0, -1.0)
-            gl.bounce_set(False, True)
             gl.callback_clicked_double_add(self.dubclick)
-            gl.multi_select_set(False)
-            gl.show()
             vbox.pack_end(gl)
+            gl.show()
 
-#-----Crucial
-    def add_files(self, gl, bt= None, fil=None ):
-        if fil:
-            if not os.path.isdir(fil):
-                data = {};data['fullpath'] = fil
-                split = fil.split("/")
-                fil = os.path.basename(fil);fil = os.path.splitext(fil)[0]
-                data['name'] = fil
-                self.add_file(gl, data)
+#----------------------FILE ADDER - NAME/CONTENT RETRIEVAL
+    def add_files(self, gl, fil):
+        if not os.path.isdir(fil):
+            data = {};data['fullpath'] = fil
+            fil = os.path.basename(fil)
+            fil = os.path.splitext(fil)[0]
+            data['name'] = fil
+            self.add_file(gl, data)
+            return
+        else:
+            files = os.listdir(fil)
+            for f in files:
+                if not f.endswith('.menu'):
+                    files.remove(f)
+            if files == []:
                 return
-            else:
-                files = os.listdir(fil)
-                for f in files:
-                    if not f.endswith('.menu'):
-                        files.remove(f)
-                if files == []:
-                    return
-                files.sort()
-                for f in files:
-                    if fil == system:
-                        f = system + f
-                    else:
-                        f = local + f
-                    self.add_files(gl, False, f)
+            files.sort()
+            for f in files:
+                if fil == SYSTEM:
+                    f = SYSTEM + f
+                else:
+                    f = LOCAL + f
+                self.add_files(gl, f)
 
     def add_file(self, gl, data ):
         itc = elm.GenlistItemClass(item_style="default", text_get_func=self.name_return, content_get_func=self.icon_return)
-
         gl.item_append(itc, data, None)
 
-    def add_group(self, gl, data ):
-        itc = elm.GenlistItemClass(item_style="default", text_get_func=self.name_return, content_get_func=self.icon_return)
+    def name_return(self, obj, part, data):
+        path = data["fullpath"]
+        label = self.get_name(path)
+        return label
 
-        gl.item_append(itc, data, None)
+    def icon_return(self, obj, part, data):
+        if part == "elm.swallow.icon":
+            f = elm.Box(self.win)
+            f.show()
 
-    def get_name(self, path, item=False):
-        split = path.split("/")
+            ic = elm.Icon(self.win)
+            ic.standard_set("text-xml")
+            ic.size_hint_weight_set(1.0, 1.0)
+            ic.size_hint_align_set(-1.0, -1.0)
+            f.pack_end(ic)
+            ic.show()
+
+            return f
+
+    def get_name(self, path, check=False):
         path = os.path.basename(path)
         path = os.path.splitext(path)[0]
-
-        if not item:
+        if not check:
             if "-" in path:
                 name = path.replace("-", " ")
             else:
@@ -149,56 +158,10 @@ class MenuLayout(object):
             name = name.title()
         else:
             name = path
-
         return name
 
-    def name_return(self, obj, part, data ):
-        path = data["fullpath"]
-        label = ""
-        label = self.get_name(path)
-        return label
 
-    def icon_return(self, obj, part, data ):
-        if part == "elm.swallow.icon":
-            path = data['fullpath']
-            f = elm.Box(self.win)
-            f.horizontal_set(True)
-            f.show()
-
-            ic = elm.Icon(self.win)
-            ic.standard_set("text-xml")
-            ic.size_hint_weight_set(1.0, 1.0)
-            ic.size_hint_align_set(-1.0, -1.0)
-            ic.show()
-
-            f.pack_end(ic)
-
-            return f
-
-    def sys_cb(self, tb=False, tbi=False):
-        item = self.sysgl.selected_item_get()
-        if item:
-            num = '0123456789'
-            path = item.data["fullpath"]
-            name = item.data["name"]
-            copy = name[:]
-            for x in num:
-                name.strip('-0123456789')
-                name = name + "-" + x
-                newpath = "%s%s.menu" %(local, name)
-                if not os.path.exists(newpath):
-                    ecore.Exe("cp '%s' '%s'" %(path, newpath))
-                    ecore.Timer(0.3, self.add_files, self.maingl, None, newpath)
-                    break
-                else:
-                    name = copy
-
-#-----------INNER WINDOWS
-    def editor(self, tb, tbi, vbox):
-        item = self.maingl.selected_item_get()
-        if item:
-            self.editor_core(tb, tbi, vbox, item)
-
+#----------------------SYSTEM LAUNCHER
     def system_launcher(self, tb, bt):
         obt = bt
         obt.disabled_set(True)
@@ -208,11 +171,10 @@ class MenuLayout(object):
         vbox.show()
 
         gl = self.sysgl = elm.Genlist(self.win)
+        self.add_files(gl, SYSTEM)
         gl.size_hint_weight_set(1.0, 1.0)
         gl.size_hint_align_set(-1.0, -1.0)
         gl.callback_clicked_double_add(self.dubclick)
-        gl.bounce_set(False, True)
-        gl.multi_select_set(False)
         gl.show()
         vbox.pack_end(gl)
 
@@ -232,47 +194,73 @@ class MenuLayout(object):
         tb = elm.Toolbar(self.win)
         tb.size_hint_weight_set(1.0, 0.0)
         tb.size_hint_align_set(-1.0, -1.0)
-        tb.item_append("", "Close", self.iwin_close, obt, iw)
-        tb.homogeneous_set(True)
+        tb.item_append("", "Close", self.iw_close, iw, obt)
         tb.select_mode_set(2)
         vbox.pack_end(tb)
         tb.show()
 
-        self.add_files(gl, None, system)
+    def sys_cb(self, tb, tbi):
+        item = self.sysgl.selected_item_get()
+        if item:
+            path = item.data["fullpath"]
+            name = item.data["name"]
+            copy = name[:]
+            for x in NUM:
+                name.strip('-0123456789')
+                name = name + "-" + x
+                newpath = "%s%s.menu" %(LOCAL, name)
+                if not os.path.exists(newpath):
+                    ecore.Exe("cp '%s' '%s'" %(path, newpath))
+                    ecore.Timer(0.5, self.add_files, self.maingl, newpath)
+                    break
+                else:
+                    name = copy
 
-    def editor_core(self, tb=None, tbi=None, vbox=None, item=None, n=None, chk=None):
+
+#----------------------EDITOR/CREATOR LAUNCHER
+    def editor(self, tb, tbi, vbox):
+        item = self.maingl.selected_item_get()
+        if item:
+            self.editor_core(vbox, item)
+
+    def creator(self, tb, tbi, vbox):
+        self.editor_core(vbox)
+
+    def editor_core(self, vbox, item=None, notify=None, check=None):
         def new():
-            num = '0123456789'
-            dest = "%snew" %local
+            dest = LOCAL + "new"
             copy = dest[:]
-            for x in num:
+            for x in NUM:
                 dest.strip('-0123456789')
                 dest = dest + "-" + x
-                newpath = "%s.menu" %dest
+                newpath = dest + ".menu"
                 if not os.path.exists(newpath):
                     ecore.Exe("cp '/opt/eDit/new.menu' '%s'" %newpath)
+                    sleep(5)
                     break
                 else:
                     dest = copy
             return newpath
 
-        if n:
-            self.n.delete()
+        if notify:
+            notify.delete()
+
         if item:
+            self.item = item
             if type(item) is unicode or type(item) is str:
                 path = self.path = item
-                item = 1
                 pathname = self.get_name(path, item)
+                pass
             else:
                 path = self.path = item.data['fullpath']
                 pathname = item.data['name']
         else:
-            n = self.n = elm.Notify(self.win)
-            n.orient = 1
+            n = elm.Notify(self.win)
             n.allow_events_set(False)
+            n.orient = 1
             n.show()
             path = new()
-            ecore.Timer(1.0, self.editor_core, None, None, vbox, path, n, 1)
+            ecore.Timer(1.0, self.editor_core, vbox, path, n, True)
             return
 
         vbox.delete()
@@ -319,7 +307,6 @@ class MenuLayout(object):
         man.size_hint_align_set(-1.0, -1.0)
         man.size_hint_weight_set(1.0, 1.0)
         sc.content_set(man)
-        man.editable_set(True)
         man.scrollable_set(False)
         man.show()
 
@@ -354,146 +341,58 @@ class MenuLayout(object):
         vbox.pack_end(btnb)
         btnb.show()
 
-        if not chk:
-            val = 1
+        if not check:
             bt = elm.Button(self.win)
             bt.size_hint_weight_set(1.0, 1.0)
             bt.text_set("Save")
-            bt.callback_clicked_add(self.editor_save, None, vbox, val)
+            bt.callback_clicked_add(self.editor_save, None, vbox, True)
             btnb.pack_end(bt)
             bt.show()
 
-        bt = elm.Button(self.win)
-        bt.size_hint_weight_set(1.0, 1.0)
-        bt.text_set("Manual")
-        if not chk:
-            bt.callback_clicked_add(self.manual_win, path, vbox, item)
-        else:
+        if not check:
+            bt = elm.Button(self.win)
+            bt.size_hint_weight_set(1.0, 1.0)
+            bt.text_set("Manual")
             bt.callback_clicked_add(self.manual_win, path, vbox)
-        btnb.pack_end(bt)
-        bt.show()
+            btnb.pack_end(bt)
+            bt.show()
 
         tb = elm.Toolbar(self.win)
         tb.size_hint_weight_set(1.0, 0.0)
         tb.size_hint_align_set(-1.0, -1.0)
-        if not chk:
+        if not check:
             tb.item_append("", "Done", self.editor_save, vbox)
         else:
             tb.item_append("", "Create", self.editor_save, vbox)
-        if not chk:
+        if not check:
             tb.item_append("", "Cancel", self.editor_close, vbox)
         else:
-            tb.item_append("", "Cancel", self.creator_close, vbox, path)
+            tb.item_append("", "Cancel", self.editor_close, vbox, path)
         tb.homogeneous_set(True)
         tb.select_mode_set(2)
         vbox.pack_end(tb)
         tb.show()
 
-#---------POPUPS
-    def rm_popup(self, tb, bt):
-        if self.maingl.selected_item_get():
-            popup = self.rmp = elm.Popup(self.win)
-            popup.size_hint_weight = (1.0, 1.0)
-            popup.text = "<b>Confirmation</><br><br>Click <i>Delete</i> if you wish to delete the launcher. Otherwise, click <i>Close</i>."
-            bt = elm.Button(self.win)
-            bt.text = "Close"
-            val = 2
-            bt.callback_clicked_add(self.remove_files, val)
-            popup.part_content_set("button1", bt)
-            bt = elm.Button(self.win)
-            bt.text = "Delete"
-            val = 1
-            bt.callback_clicked_add(self.remove_files, val)
-            popup.part_content_set("button2", bt)
-            popup.show()
-
-#---------GENERAL
-    def separator(self, vbox=False, addto=False):
-        sep = elm.Separator(self.win)
-        sep.horizontal_set(True)
-        sep.show()
-        if vbox:
-            vbox.pack_end(sep)
-        else:
-            addto.content_set(sep)
-
-    def iw_close(self, tb=False, tbi=False, obt=False):
-        self.iw.delete()
-        if obt:
-            obt.disabled_set(False)
-    def iwin_close(self, tb=False, tbi=False, obt=False, iw=False):
-        iw.delete()
-        if obt:
-            obt.disabled_set(False)
-
-    def editor_save(self, tb=False, tbi=False, vbox=False, val=False):
-        #~ repl = self.line_list()
-        #~ search = self.search_list()
+    def editor_save(self, tb, tbi, vbox, check=False):
         self.man.file_save()
         dest = self.dtfp.entry_get()
-        dest = local + dest + ".menu"
+        dest = LOCAL + dest + ".menu"
         path = self.path
-
-        #~ with open(path) as file:
-            #~ data = file.readlines()
-        #~ for i, line in enumerate(data):
-            #~ data[i]= line.decode('utf-8')
-        #~ for x in search:
-            #~ if x:
-                #~ y = search.index(x)
-                #~ data = self.return_data(data, repl, x, y)
-        #~ for x in search:
-            #~ if x:
-                #~ y = search.index(x)
-                #~ data = self.return_new(data, repl, x, y)
-        #~ for i, line in enumerate(data):
-            #~ data[i]= line.encode('utf-8')
-        #~ with open(path, 'w') as file:
-            #~ file.writelines(data)
 
         if not path == dest:
             ecore.Exe("mv '%s' '%s'" %(path, dest))
+            sleep(5)
 
-        ecore.Exe("update-menus")
+        #~ ecore.Exe("update-menus")
 
-        if val:
-            self.editor_core(None, None, vbox, dest)
+        if check:
+            self.editor_core(vbox, dest)
             return
         else:
             vbox.delete()
             self.vipbox()
 
-    def creator_create(self, tb=False, tbi=False, vbox=False, dest=False):
-        new = self.line_list()
-        path = self.dtfp.entry_get()
-
-        with open(dest) as file:
-            data = file.readlines()
-        data[1] = new[0]
-        del new[0]
-        data.extend(new)
-
-        with open(dest, 'w') as file:
-            file.writelines(data)
-
-        ecore.Exe("mv '%s' '%s%s.menu'" %(dest, local, path))
-        vbox.delete()
-        self.vipbox()
-
-        ecore.Exe("update-menus")
-
-    def manual_win(self, bt, path, vbox, item=False):
-        if not item:
-            with open(path) as file:
-                data = file.readlines()
-            new = self.line_list()
-            data[1] = new[0]
-            del new[0]
-            data.extend(new)
-            with open(path, 'w') as file:
-                file.writelines(data)
-            item = path
-
+    def manual_win(self, bt, path, vbox):
         vbox.delete()
 
         vbox = elm.Box(self.win)
@@ -505,26 +404,54 @@ class MenuLayout(object):
 
         self.separator(vbox)
 
-        self.desktop_file(path, vbox, item)
+        self.file_viewer(path, vbox)
 
-    def dubclick(self, maingl, item):
-        path = item.data['fullpath']
+    def editor_close(self, tb, tbi, vbox, dest=False):
+        if dest:
+            ecore.Exe("rm '%s'" %dest)
+            sleep(3)
+        vbox.delete()
+        self.vipbox()
 
-        box = elm.Box(self.win)
-        box.padding_set(0 , 5)
-        box.size_hint_weight_set(1.0, 1.0)
-        box.show()
+    def delay(self, tb, tbi, vbox, item):
+        tb.disabled_set(True)
+        n = elm.Notify(self.win)
+        n.orient = 1
+        n.allow_events_set(False)
+        n.show()
 
-        iw = self.iw = elm.InnerWindow(self.win)
-        iw.content_set(box)
-        iw.show()
-        iw.activate()
-
-        val = 1
-        self.desktop_file(path, box, item, val)
+        ecore.Timer(1.5, self.editor_core, vbox, item, n)
 
 
-    def desktop_file(self, path, vbox, item, val=None):
+#----------------------REMOVAL POPUP
+    def rm_popup(self, tb, bt):
+        if self.maingl.selected_item_get():
+            popup = self.rmp = elm.Popup(self.win)
+            popup.size_hint_weight = (1.0, 1.0)
+            popup.text = "<b>Confirmation</><br><br>Click <i>Delete</i> if you wish to delete the menu. Otherwise, click <i>Cancel</i>."
+            bt = elm.Button(self.win)
+            bt.text = "Cancel"
+            bt.callback_clicked_add(self.remove_files, True)
+            popup.part_content_set("button1", bt)
+            bt = elm.Button(self.win)
+            bt.text = "Delete"
+            bt.callback_clicked_add(self.remove_files, False)
+            popup.part_content_set("button2", bt)
+            popup.show()
+
+    def remove_files(self, bt, cancel):
+        item = self.maingl.selected_item_get()
+        path = item.data["fullpath"]
+        self.rmp.delete()
+        if cancel:
+            return
+        if os.path.exists(path):
+            ecore.Exe("rm '%s'" %path)
+        item.delete()
+
+
+#----------------------FILE CONTENT VIEWER
+    def file_viewer(self, path, vbox, iw, check=None):
         sc = elm.Scroller(self.win)
         sc.size_hint_align_set(-1.0, -1.0)
         sc.size_hint_weight_set(1.0, 1.0)
@@ -532,9 +459,9 @@ class MenuLayout(object):
         vbox.pack_end(sc)
         sc.show()
 
-        man = self.man = elm.Entry(self.win)
+        man = elm.Entry(self.win)
         man.line_wrap_set(0)
-        if val:
+        if check:
             man.autosave_set(False)
         else:
             man.autosave_set(True)
@@ -542,7 +469,7 @@ class MenuLayout(object):
         man.size_hint_align_set(-1.0, -1.0)
         man.size_hint_weight_set(1.0, 1.0)
         sc.content_set(man)
-        if val:
+        if check:
             man.editable_set(False)
         else:
             man.editable_set(True)
@@ -552,90 +479,44 @@ class MenuLayout(object):
         tb = elm.Toolbar(self.win)
         tb.size_hint_weight_set(1.0, 0.0)
         tb.size_hint_align_set(-1.0, -1.0)
-        if val:
-            tb.item_append("", "Close", self.iw_close)
+        if check:
+            tb.item_append("", "Close", self.iw_close, iw)
         else:
-            tb.item_append("", "Done", self.delay, vbox, item)
-        tb.homogeneous_set(True)
+            tb.item_append("", "Done", self.delay, vbox, self.item)
         tb.select_mode_set(2)
         vbox.pack_end(tb)
         tb.show()
 
-    def editor_full(self, bt=False, vbox=False):
-        vbox.delete()
-        self.vipbox()
-    def creator_full(self, bt=False, vbox=False, dest=False):
-        ecore.Exe("rm '%s'" %dest)
-        vbox.delete()
-        self.vipbox()
 
-    def editor_close(self, tb=False, tbi=False, vbox=False):
-        vbox.delete()
-        self.vipbox()
-    def creator_close(self, tb=False, tbi=False, vbox=False, dest=False):
-        ecore.Exe("rm '%s'" %dest)
-        vbox.delete()
-        self.vipbox()
+#---------GENERAL
+    def separator(self, vbox=False, addto=False):
+        sep = elm.Separator(self.win)
+        sep.horizontal_set(True)
+        sep.show()
+        if vbox:
+            vbox.pack_end(sep)
+        else:
+            addto.content_set(sep)
 
-    def remove_files(self, bt, val):
-        item = self.maingl.selected_item_get()
-        path = item.data["fullpath"]
-        self.rmp.delete()
-        if val == 2:
-            return
-        if os.path.exists(path):
-            ecore.Exe("rm '%s'" %path)
-        item.delete()
+    def iw_close(self, tb, tbi, iw, obt=False):
+        iw.delete()
+        if obt:
+            obt.disabled_set(False)
 
-    def return_data(self, data=False, repl=False, x=False, y=False):
-        for i, line in enumerate(data):
-            if x == "Name=":
-                if x in line:
-                    data[i] = repl[y]
-                    break
-            if x in line:
-                data[i] = repl[y]
-                break
-        return data
+    def dubclick(self, maingl, item):
+        path = item.data['fullpath']
 
-    def return_new(self, data=False, repl=False, x=False, y=False):
-        for line in data:
-            if x == "Name=":
-                break
-            check = " ".join(data)
-            if x in check:
-                break
-            if not x in data:
-                data.append(repl[y])
-                break
-        return data
+        box = elm.Box(self.win)
+        box.padding_set(0 , 5)
+        box.size_hint_weight_set(1.0, 1.0)
+        box.show()
 
-    def line_list(self):
-        L = []
-        name = "Name=%s" %self.name.entry_get();L.append(name)
-        typ  = "Type=Directory";L.append(typ)
-        com  = "Comment=%s" %self.com.entry_get();L.append(com)
-        icon = "Icon=%s" %self.icon.entry_get();L.append(icon)
-        L = [x+"\n" for x in L]
-        return L
+        iw = elm.InnerWindow(self.win)
+        iw.content_set(box)
+        iw.show()
+        iw.activate()
 
-    def search_list(self):
-        S = []
-        name = "Name=";S.append(name)
-        typ  = "";S.append(typ)
-        com  = "Comment=";S.append(com)
-        icon = "Icon=";S.append(icon)
-        return S
-
-    def delay(self, tb, tbi, vbox, item):
-        tb.disabled_set(True)
-        n = self.n = elm.Notify(self.win)
-        n.orient = 1
-        n.allow_events_set(False)
-        n.show()
-        tb = "filler"
-
-        ecore.Timer(1.5, self.editor_core, tb, tbi, vbox, item, n)
+        self.file_viewer(path, box, iw, True)
 
 #~
 #~ class Menu(dexml.Model):

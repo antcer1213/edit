@@ -976,6 +976,7 @@ class Launchers(object):
             file.writelines(data)
 
         ecore.Exe("mv '%s' '%s%s.desktop'" %(dest, LOCAL, path))
+        sleep(5)
         vbox.delete()
         self.vipbox()
 
