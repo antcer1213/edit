@@ -1,18 +1,16 @@
 #!/usr/bin/env python
 # encoding: utf-8
 import os
-import elementary as elm
-import evas
-import edje
-import ecore
 import dexml
+import elementary as elm
+from ecore import Exe, Timer
 from time import sleep
 from dexml import fields
 
 
 """eDit
 
-An lxde/e17 menu-editor GUI built on Python-EFL's.
+A menu-editor GUI built on Python-EFL's.
 By: AntCer (bodhidocs@gmail.com)
 
 Started: March 4, 2013
@@ -210,8 +208,8 @@ class MenuLayout(object):
                 name = name + "-" + x
                 newpath = "%s%s.menu" %(LOCAL, name)
                 if not os.path.exists(newpath):
-                    ecore.Exe("cp '%s' '%s'" %(path, newpath))
-                    ecore.Timer(0.5, self.add_files, self.maingl, newpath)
+                    Exe("cp '%s' '%s'" %(path, newpath))
+                    Timer(0.5, self.add_files, self.maingl, newpath)
                     break
                 else:
                     name = copy
@@ -235,7 +233,7 @@ class MenuLayout(object):
                 dest = dest + "-" + x
                 newpath = dest + ".menu"
                 if not os.path.exists(newpath):
-                    ecore.Exe("cp '/opt/eDit/new.menu' '%s'" %newpath)
+                    Exe("cp '/opt/eDit/new.menu' '%s'" %newpath)
                     sleep(5)
                     break
                 else:
@@ -260,7 +258,7 @@ class MenuLayout(object):
             n.orient = 1
             n.show()
             path = new()
-            ecore.Timer(1.0, self.editor_core, vbox, path, n, True)
+            Timer(1.0, self.editor_core, vbox, path, n, True)
             return
 
         vbox.delete()
@@ -349,7 +347,6 @@ class MenuLayout(object):
             btnb.pack_end(bt)
             bt.show()
 
-        if not check:
             bt = elm.Button(self.win)
             bt.size_hint_weight_set(1.0, 1.0)
             bt.text_set("Manual")
@@ -362,11 +359,9 @@ class MenuLayout(object):
         tb.size_hint_align_set(-1.0, -1.0)
         if not check:
             tb.item_append("", "Done", self.editor_save, vbox)
-        else:
-            tb.item_append("", "Create", self.editor_save, vbox)
-        if not check:
             tb.item_append("", "Cancel", self.editor_close, vbox)
         else:
+            tb.item_append("", "Create", self.editor_save, vbox)
             tb.item_append("", "Cancel", self.editor_close, vbox, path)
         tb.homogeneous_set(True)
         tb.select_mode_set(2)
@@ -380,10 +375,10 @@ class MenuLayout(object):
         path = self.path
 
         if not path == dest:
-            ecore.Exe("mv '%s' '%s'" %(path, dest))
+            Exe("mv '%s' '%s'" %(path, dest))
             sleep(5)
 
-        #~ ecore.Exe("update-menus")
+        #~ Exe("update-menus")
 
         if check:
             self.editor_core(vbox, dest)
@@ -408,7 +403,7 @@ class MenuLayout(object):
 
     def editor_close(self, tb, tbi, vbox, dest=False):
         if dest:
-            ecore.Exe("rm '%s'" %dest)
+            Exe("rm '%s'" %dest)
             sleep(3)
         vbox.delete()
         self.vipbox()
@@ -420,7 +415,7 @@ class MenuLayout(object):
         n.allow_events_set(False)
         n.show()
 
-        ecore.Timer(1.5, self.editor_core, vbox, item, n)
+        Timer(1.5, self.editor_core, vbox, item, n)
 
 
 #----------------------REMOVAL POPUP
@@ -445,8 +440,8 @@ class MenuLayout(object):
         self.rmp.delete()
         if cancel:
             return
-        if os.path.exists(path):
-            ecore.Exe("rm '%s'" %path)
+        elif os.path.exists(path):
+            Exe("rm '%s'" %path)
         item.delete()
 
 
@@ -461,30 +456,27 @@ class MenuLayout(object):
 
         man = elm.Entry(self.win)
         man.line_wrap_set(0)
-        if check:
-            man.autosave_set(False)
-        else:
-            man.autosave_set(True)
         man.file_set(path, 0)
         man.size_hint_align_set(-1.0, -1.0)
         man.size_hint_weight_set(1.0, 1.0)
         sc.content_set(man)
-        if check:
-            man.editable_set(False)
-        else:
-            man.editable_set(True)
         man.scrollable_set(False)
-        man.show()
 
         tb = elm.Toolbar(self.win)
         tb.size_hint_weight_set(1.0, 0.0)
         tb.size_hint_align_set(-1.0, -1.0)
-        if check:
-            tb.item_append("", "Close", self.iw_close, iw)
-        else:
-            tb.item_append("", "Done", self.delay, vbox, self.item)
         tb.select_mode_set(2)
         vbox.pack_end(tb)
+
+        if check:
+            man.autosave_set(False)
+            man.editable_set(False)
+            tb.item_append("", "Close", self.iw_close, iw)
+        else:
+            man.autosave_set(True)
+            man.editable_set(True)
+            tb.item_append("", "Done", self.delay, vbox, self.item)
+
         tb.show()
 
 

@@ -2,15 +2,13 @@
 # encoding: utf-8
 import os
 import elementary as elm
-import evas
-import edje
-import ecore
+from ecore import Exe, Timer
 from time import sleep
 
 
 """eDit
 
-An lxde/e17 menu-editor GUI built on Python-EFL's.
+A menu-editor GUI built on Python-EFL's.
 By: AntCer (bodhidocs@gmail.com)
 
 Started: March 4, 2013
@@ -252,15 +250,15 @@ class MenuItem(object):
         vbox.pack_end(tb)
         tb.show()
 
-    def sys_cb(self, tb=False, tbi=False):
+    def sys_cb(self, tb, tbi):
         item = self.sysgl.selected_item_get()
         if item:
             path = item.data["fullpath"]
             name = item.data["name"]
             newpath = "%s%s.directory" %(LOCAL, name)
             if not os.path.exists(newpath):
-                ecore.Exe("cp '%s' '%s'" %(path, LOCAL))
-                ecore.Timer(0.5, self.add_files, self.maingl, newpath)
+                Exe("cp '%s' '%s'" %(path, LOCAL))
+                Timer(0.5, self.add_files, self.maingl, newpath)
 
 
 #----------------------EDITOR/CREATOR LAUNCHER
@@ -281,9 +279,9 @@ class MenuItem(object):
                 dest = dest + "-" + x
                 newpath = dest + ".directory"
                 if not os.path.exists(newpath):
-                    ecore.Exe("echo '[Desktop Entry]' > %s" %newpath)
+                    Exe("echo '[Desktop Entry]' > %s" %newpath)
                     sleep(5)
-                    ecore.Exe("echo 'Name=Default' >> %s" %newpath)
+                    Exe("echo 'Name=Default' >> %s" %newpath)
                     sleep(5)
                     break
                 else:
@@ -308,7 +306,7 @@ class MenuItem(object):
             n.allow_events_set(False)
             n.show()
             path = new()
-            ecore.Timer(1.0, self.editor_core, vbox, path, n, True)
+            Timer(1.0, self.editor_core, vbox, path, n, True)
             return
 
         name = "";icon = "";com = ""
@@ -382,9 +380,7 @@ class MenuItem(object):
         fr.content_set(en)
 
         icon = icon[:-1]
-        if ic.standard_set(icon):
-            pass
-        else:
+        if not ic.standard_set(icon):
             ic.standard_set("none")
         ic.size_hint_weight_set(1.0, 1.0)
         ic.size_hint_align_set(-1.0, -1.0)
@@ -462,12 +458,8 @@ class MenuItem(object):
             btnb.pack_end(bt)
             bt.show()
 
-        if not check:
             bt = elm.Button(self.win)
             bt.text_set("Manual")
-            #~ if not check:
-                #~ bt.callback_clicked_add(self.manual_win, path, vbox, True)
-            #~ else:
             bt.callback_clicked_add(self.manual_win, path, vbox)
             btnb.pack_end(bt)
             bt.show()
@@ -477,18 +469,16 @@ class MenuItem(object):
         tb.size_hint_align_set(-1.0, -1.0)
         if not check:
             tb.item_append("", "Done", self.editor_save, vbox)
-        else:
-            tb.item_append("", "Create", self.creator_create, vbox)
-        if not check:
             tb.item_append("", "Cancel", self.editor_close, vbox)
         else:
+            tb.item_append("", "Create", self.creator_create, vbox)
             tb.item_append("", "Cancel", self.editor_close, vbox, path)
         tb.homogeneous_set(True)
         tb.select_mode_set(2)
         vbox.pack_end(tb)
         tb.show()
 
-    def editor_save(self, tb=False, tbi=False, vbox=False, check=False):
+    def editor_save(self, tb, tbi, vbox, check=False):
         repl = self.line_list()
         search = self.search_list()
         path = self.path
@@ -508,10 +498,10 @@ class MenuItem(object):
         with open(path, 'w') as file:
             file.writelines(data)
 
-        #~ ecore.Exe("update-menus")
+        #~ Exe("update-menus")
 
         if not dest == path:
-            ecore.Exe("mv '%s' '%s'" %(path, dest))
+            Exe("mv '%s' '%s'" %(path, dest))
             sleep(5)
 
         if check:
@@ -519,13 +509,13 @@ class MenuItem(object):
             n.orient = 1
             n.allow_events_set(False)
             n.show()
-            ecore.Timer(1.0, self.editor_core, vbox, dest, n)
+            Timer(1.0, self.editor_core, vbox, dest, n)
             return
         else:
             vbox.delete()
             self.vipbox()
 
-    def creator_create(self, tb=False, tbi=False, vbox=False):
+    def creator_create(self, tb, tbi, vbox):
         new = self.line_list()
         path = self.path
         dest = self.dtfp.entry_get()
@@ -540,12 +530,12 @@ class MenuItem(object):
             file.writelines(data)
 
         if not dest == path:
-            ecore.Exe("mv '%s' '%s'" %(path, dest))
+            Exe("mv '%s' '%s'" %(path, dest))
             sleep(5)
 
         vbox.delete()
         self.vipbox()
-        #~ ecore.Exe("update-menus")
+        #~ Exe("update-menus")
 
     def manual_win(self, bt, path, vbox, check=False):
         if not check:
@@ -571,6 +561,24 @@ class MenuItem(object):
 
         self.file_viewer(path, vbox)
 
+    def editor_close(self, tb, tbi, vbox, dest=False):
+        if dest:
+            Exe("rm '%s'" %dest)
+            sleep(3)
+        vbox.delete()
+        self.vipbox()
+
+    def delay(self, tb, tbi, vbox, item):
+        tb.disabled_set(True)
+        n = elm.Notify(self.win)
+        n.orient = 1
+        n.allow_events_set(False)
+        n.show()
+
+        Timer(1.5, self.editor_core, vbox, item, n)
+
+
+#----------------------EDITOR/CREATOR INFO RETRIEVAL
     def return_data(self, data, repl, x, y):
         for i, line in enumerate(data):
             if x == "Name=":
@@ -611,22 +619,6 @@ class MenuItem(object):
         icon = "Icon=";S.append(icon)
         return S
 
-    def editor_close(self, tb=False, tbi=False, vbox=False, dest=False):
-        if dest:
-            ecore.Exe("rm '%s'" %dest)
-            sleep(3)
-        vbox.delete()
-        self.vipbox()
-
-    def delay(self, tb, tbi, vbox, item):
-        tb.disabled_set(True)
-        n = elm.Notify(self.win)
-        n.orient = 1
-        n.allow_events_set(False)
-        n.show()
-
-        ecore.Timer(1.5, self.editor_core, vbox, item, n)
-
 
 #----------------------REMOVAL POPUP
     def rm_popup(self, tb, bt):
@@ -650,14 +642,15 @@ class MenuItem(object):
         self.rmp.delete()
         if cancel:
             return
-        if os.path.exists(path):
-            ecore.Exe("rm '%s'" %path)
+        elif os.path.exists(path):
+            Exe("rm '%s'" %path)
         item.delete()
 
 
 #----------------------FILE CONTENT VIEWER
     def file_viewer(self, path, vbox, iw, check=None):
         if check:
+            icon = "none"
             with open(path) as deskfile:
                 for x in deskfile:
                     if "Icon=" in x:
@@ -671,9 +664,7 @@ class MenuItem(object):
 
             icon = icon[:-1]
             ic = elm.Icon(self.win)
-            if ic.standard_set(icon):
-                pass
-            else:
+            if not ic.standard_set(icon):
                 ic.standard_set("none")
             ic.size_hint_weight_set(1.0, 1.0)
             ic.size_hint_align_set(-1.0, -1.0)
@@ -700,30 +691,27 @@ class MenuItem(object):
 
         man = self.man = elm.Entry(self.win)
         man.line_wrap_set(0)
-        if check:
-            man.autosave_set(False)
-        else:
-            man.autosave_set(True)
         man.file_set(path, 0)
         man.size_hint_align_set(-1.0, -1.0)
         man.size_hint_weight_set(1.0, 1.0)
         sc.content_set(man)
-        if check:
-            man.editable_set(False)
-        else:
-            man.editable_set(True)
         man.scrollable_set(False)
-        man.show()
 
         tb = elm.Toolbar(self.win)
         tb.size_hint_weight_set(1.0, 0.0)
         tb.size_hint_align_set(-1.0, -1.0)
-        if check:
-            tb.item_append("", "Close", self.iw_close, iw)
-        else:
-            tb.item_append("", "Done", self.delay, vbox, self.item)
         tb.select_mode_set(2)
         vbox.pack_end(tb)
+
+        if check:
+            man.autosave_set(False)
+            man.editable_set(False)
+            tb.item_append("", "Close", self.iw_close, iw)
+        else:
+            man.autosave_set(True)
+            man.editable_set(True)
+            tb.item_append("", "Done", self.delay, vbox, self.item)
+
         tb.show()
 
 

@@ -8,7 +8,7 @@ from time import sleep
 
 """eDit
 
-An lxde/e17 menu-editor GUI built on Python-EFL's.
+A menu-editor GUI built on Python-EFL's.
 By: AntCer (bodhidocs@gmail.com)
 
 Started: March 4, 2013
