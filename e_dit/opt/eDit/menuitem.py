@@ -559,7 +559,7 @@ class MenuItem(object):
 
         self.separator(vbox)
 
-        self.file_viewer(path, vbox)
+        self.file_viewer(path, vbox, None)
 
     def editor_close(self, tb, tbi, vbox, dest=False):
         if dest:

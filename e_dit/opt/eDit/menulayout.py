@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 import os
-import dexml
 import elementary as elm
 from ecore import Exe, Timer
 from time import sleep
-from dexml import fields
 
 
 """eDit
@@ -509,7 +507,3 @@ class MenuLayout(object):
         iw.activate()
 
         self.file_viewer(path, box, iw, True)
-
-#~
-#~ class Menu(dexml.Model):
-    #~ menus = fields.List(Menu)

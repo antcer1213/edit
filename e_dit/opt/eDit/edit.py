@@ -15,8 +15,18 @@ Started: March 4, 2013
 """
 HOME = os.getenv("HOME")
 CONFIG = "%s/.config/eDit/"%HOME
+DIR = "%s/.local/share/desktop-directories/" %HOME
+MENU = "%s/.config/menus/" %HOME
+
+
 
 #---Config Files
+if not os.path.isdir(MENU):
+    Exe("mkdir '%s'"%MENU)
+    sleep(2)
+if not os.path.isdir(DIR):
+    Exe("mkdir '%s'"%DIR)
+    sleep(2)
 if not os.path.isdir(CONFIG):
     Exe("mkdir '%s'"%CONFIG)
     sleep(10)
