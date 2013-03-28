@@ -389,6 +389,11 @@ class Launchers(object):
                 label = x.split("=")[-1]
                 label = label[:-1]
                 if name:
+                    test = " ".join(name)
+                    if label in test:
+                        label = label + "-1"
+                    if "-1" in label:
+                        label = label.rstrip("-1") + "-2"
                     if name[0] == "one":
                         name[0] = label
                     else:
