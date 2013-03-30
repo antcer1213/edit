@@ -19,8 +19,8 @@ CONFIG = "%s/.config/eDit"%HOME
 VIEW = "%s/default.view"%CONFIG
 LOCAL = "%s/.local/share/applications/" %HOME
 SYSTEM = "/usr/share/applications/"
-CATNAME = ['Games', 'Sound & Video', 'Graphics', 'Internet', 'Accessories', 'Office', 'System Tools', 'Programming', 'Education', 'Preferences']
-CATTYPE = ['Game;', 'AudioVideo;', 'Graphics;', 'Network;', 'Utility;', 'Office;', 'System;', 'Development;', 'Education;', 'Settings;']
+CATNAME = ['Games', 'Sound & Video', 'Graphics', 'Internet', 'Preferences', 'System Tools', 'Accessories', 'Office', 'Programming', 'Education']
+CATTYPE = ['Game;', 'AudioVideo;', 'Graphics;', 'Network;', 'Settings;', 'System;', 'Utility;', 'Office;', 'Development;', 'Education;']
 
 
 class Launchers(object):
