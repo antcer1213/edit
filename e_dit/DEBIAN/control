@@ -1,9 +1,9 @@
 Package: edit
-Version: 0.6
+Version: 0.7
 Section: main
 Priority: optional
 Architecture: all
-Depends: python-elementary, python-evas, python-ecore, python-edbus, python-edje, python-emotion
+Depends: python-elementary, python-evas, python-ecore
 Maintainer: Anthony Cervantes
 Description: eDit (Main Menu Editor)
  A simple GUI to manipulate .desktop files and their contents.

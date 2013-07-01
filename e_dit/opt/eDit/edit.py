@@ -33,6 +33,9 @@ if not os.path.isdir(CONFIG):
 if not os.path.exists("%sdefault.view"%CONFIG):
     Exe("echo 'catview=False' > '%sdefault.view'"%CONFIG)
     sleep(10)
+if not os.path.exists("%scattree.view"%CONFIG):
+    Exe("echo ' ' > '%scattree.view'"%CONFIG)
+    sleep(10)
 
 #---Start
 

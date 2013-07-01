@@ -2,6 +2,7 @@
 # encoding: utf-8
 import os
 import elementary as elm
+import evas
 from ecore import Exe, Timer
 from time import sleep
 from menuitem import MenuItem
@@ -19,8 +20,12 @@ CONFIG = "%s/.config/eDit"%HOME
 VIEW = "%s/default.view"%CONFIG
 LOCAL = "%s/.local/share/applications/" %HOME
 SYSTEM = "/usr/share/applications/"
-CATNAME = ['Games', 'Sound & Video', 'Graphics', 'Internet', 'Preferences', 'System Tools', 'Accessories', 'Office', 'Programming', 'Education']
-CATTYPE = ['Game;', 'AudioVideo;', 'Graphics;', 'Network;', 'Settings;', 'System;', 'Utility;', 'Office;', 'Development;', 'Education;']
+#~ CATNAME = ['Games', 'Sound & Video', 'Graphics', 'Internet', 'Preferences', 'System Tools', 'Accessories', 'Office', 'Programming', 'Education']
+#~ CATTYPE = ['Game;', 'AudioVideo;', 'Graphics;', 'Network;', 'Settings;', 'System;', 'Utility;', 'Office;', 'Development;', 'Education;']
+CATNAMES = ['Accessories', 'Preferences', 'Programming', 'Education', 'Games', 'Graphics', 'Internet', 'Sound & Video', 'Office', 'System Tools', 'Other', 'Uncategorized']
+CATITM = {'Accessories': None, 'Preferences': None, 'Programming': None, 'Education': None, 'Games': None, 'Graphics': None, 'Internet': None, 'Sound & Video': None, 'Office': None, 'System Tools': None, 'Other': None, 'Uncategorized': None}
+CATDIC = {'Accessories': 'Utility;', 'Preferences': 'Settings;', 'Programming': 'Development;', 'Education': 'Education;', 'Games': 'Game;', 'Graphics': 'Graphics;', 'Internet': 'Network;', 'Sound & Video': 'AudioVideo;', 'Office': 'Office;', 'System Tools': 'System;', 'Other': ';;', 'Uncategorized': 'None;'}
+CATLST = {'Accessories': [], 'Preferences': [], 'Programming': [], 'Education': [], 'Games': [], 'Graphics': [], 'Internet': [], 'Sound & Video': [], 'Office': [], 'System Tools': [], 'Other': [], 'Uncategorized': []}
 
 
 class Launchers(object):
@@ -41,7 +46,7 @@ class Launchers(object):
             win = self.win = elm.StandardWindow("eDit", "eDit")
             win.callback_delete_request_add(lambda o: elm.exit())
 
-        self.A = False
+        #~ self.A = False
 
         self.vipbox()
 
@@ -100,97 +105,71 @@ class Launchers(object):
 
 #----------------------MAIN LIST
     def gl(self, tb=False, tbi=False, vbox=False, viewcat=False):
+        for category in CATNAMES:
+            CATITM[category] = None
         if tb:
             self.maingl.clear()
-            if viewcat:
-                self.categoryview()
+            #~ if viewcat:
+                #~ self.categoryview()
             self.viewcat = viewcat
             self.add_files(self.maingl, LOCAL)
         else:
             gl = self.maingl = elm.Genlist(self.win)
             gl.size_hint_weight_set(1.0, 1.0)
             gl.size_hint_align_set(-1.0, -1.0)
-            if viewcat:
-                self.categoryview()
+            #~ if viewcat:
+                #~ self.categoryview()
             self.viewcat = viewcat
+            gl.elm_event_callback_add(self.inter_subitems)
             gl.callback_clicked_double_add(self.dubclick)
             gl.show()
             vbox.pack_end(gl)
 
 
+#----------------------SHOW/HIDE SUBITEMS IF CATEGORY VIEW
+    def inter_subitems(self, obj, gl, event_type, event, *args):
+        if not self.viewcat:
+            return
+
+        gli = gl.selected_item_get()
+        try:
+            gli.data["cat"]
+        except:
+            return
+
+        if event_type == evas.EVAS_CALLBACK_KEY_UP:
+            if event.keyname == "Return" or event.keyname == "space":
+                if not gli.expanded_get():
+                    self.hide_subitems(gli)
+                else:
+                    self.show_subitems(gli, gl)
+
+    def hide_subitems(self, gli):
+        gli.subitems_clear()
+
+    def show_subitems(self, gli, gl):
+        for key in CATDIC.keys():
+            if gli.data['name'] == key:
+                if CATLST[key] == "[]":
+                    return
+                cat = key
+                num = len(CATLST[key])
+                for i, data in enumerate(CATLST[key]):
+                    self.add_file(gl, data, cat)
+                    if i == num:
+                        break
+                break
+
+
 #----------------------CATEGORY VIEW
-    def categoryview(self):
-        catdata = {'name':'Accessories', 'cat':'Utility;', 'icon':'applications-accessories'}
-        itpc = elm.GenlistItemClass(item_style="default",
-                text_get_func=self.cat_return,
-                content_get_func=self.icon_return)
-        self.A = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
-
-        catdata = {'name':'Preferences', 'cat':'Settings;', 'icon':'preferences-desktop'}
-        itpc = elm.GenlistItemClass(item_style="default",
-                text_get_func=self.cat_return,
-                content_get_func=self.icon_return)
-        self.B = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
-
-        catdata = {'name':'Programming', 'cat':'Development;', 'icon':'applications-development'}
-        itpc = elm.GenlistItemClass(item_style="default",
-                text_get_func=self.cat_return,
-                content_get_func=self.icon_return)
-        self.C = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
-
-        catdata = {'name':'Education', 'cat':'Education;', 'icon':'applications-science'}
-        itpc = elm.GenlistItemClass(item_style="default",
-                text_get_func=self.cat_return,
-                content_get_func=self.icon_return)
-        self.D = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
-
-        catdata = {'name':'Games', 'cat':'Game;', 'icon':'applications-games'}
-        itpc = elm.GenlistItemClass(item_style="default",
-                text_get_func=self.cat_return,
-                content_get_func=self.icon_return)
-        self.E = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
-
-        catdata = {'name':'Graphics', 'cat':'Graphics;', 'icon':'applications-graphics'}
-        itpc = elm.GenlistItemClass(item_style="default",
-                text_get_func=self.cat_return,
-                content_get_func=self.icon_return)
-        self.F = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
-
-        catdata = {'name':'Internet', 'cat':'Network;', 'icon':'applications-internet'}
-        itpc = elm.GenlistItemClass(item_style="default",
-                text_get_func=self.cat_return,
-                content_get_func=self.icon_return)
-        self.G = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
-
-        catdata = {'name':'Sound & Video', 'cat':'AudioVideo;', 'icon':'applications-multimedia'}
-        itpc = elm.GenlistItemClass(item_style="default",
-                text_get_func=self.cat_return,
-                content_get_func=self.icon_return)
-        self.H = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
-
-        catdata = {'name':'Office', 'cat':'Office;', 'icon':'applications-office'}
-        itpc = elm.GenlistItemClass(item_style="default",
-                text_get_func=self.cat_return,
-                content_get_func=self.icon_return)
-        self.I = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
-
-        catdata = {'name':'Other', 'cat':';', 'icon':'applications-other'}
-        itpc = elm.GenlistItemClass(item_style="default",
-                text_get_func=self.cat_return,
-                content_get_func=self.icon_return)
-        self.J = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
-
-        catdata = {'name':'System Tools', 'cat':'System;', 'icon':'applications-system'}
-        itpc = elm.GenlistItemClass(item_style="default",
-                text_get_func=self.cat_return,
-                content_get_func=self.icon_return)
-        self.K = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
-
-        catdata = {'name':'Uncategorized', 'cat':'None;', 'icon':'none'}
-        itpc = elm.GenlistItemClass(item_style="default",
-                text_get_func=self.cat_return,
-                content_get_func=self.icon_return)
-        self.L = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
+    #~ def categoryview(self):
+        #~ for cat in CATNAMES:
+            #~ catdata = {'name':'Accessories', 'cat':'Utility;', 'icon':'applications-accessories'}
+            #~ catdata = {'name': cat, 'cat': CATDIC[cat]}
+            #~ itpc = elm.GenlistItemClass(item_style="default",
+                #~ text_get_func=self.cat_return,
+                #~ content_get_func=None)
+            #~ CATITM[cat] = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
 
 
 #----------------------FILE ADDER - NAME/CONTENT RETRIEVAL
@@ -202,19 +181,23 @@ class Launchers(object):
             fil = os.path.splitext(fil)[0]
             data['name'] = fil
 
-            A = CATNAME[:]
-            B = CATTYPE[:]
             cat = "Other"
             with open(copy) as deskfile:
                 for x in deskfile:
-                    for i, a in enumerate(A):
-                        b = B[i]
-                        if b in x:
-                            cat = a
+                    if x.startswith("Categories="):
+                        listing = x.split("=")[1].split(";")
+                        for trial in listing:
+                            trial = "%s;"%trial
+                            for category in CATDIC.keys():
+                                if CATDIC[category] == trial:
+                                    cat = category
+                                    break
+                            if cat != "Other" and not "System" in "".join(listing):
+                                break
+                        if "Categories=\n" in x:
+                            cat = "None"
                             break
-                    if "Categories=\n" in x:
-                        cat = "None"
-                        break
+
             data['type'] = cat
             self.add_file(gl, data, cat)
             return
@@ -242,10 +225,12 @@ class Launchers(object):
             for i, n in enumerate(new):
                 capfile.setdefault(n, old[i])
             new.sort()
-            for n in new:
+            number = len(new)
+            for i, n in enumerate(new):
                 l = capfile.get(n)
                 n = "%s%s" %(fil, l)
                 self.add_files(gl, n)
+
 
     def add_file(self, gl, data, cat):
         itc = elm.GenlistItemClass(item_style="default",
@@ -259,45 +244,43 @@ class Launchers(object):
         if self.viewcat == False:
             self.maingl.item_append(itc, data, None)
             return
-        if cat == self.A.data['name']:
-            gl.item_append(itc, data, self.A)
-            return
-        elif cat == self.B.data['name']:
-            gl.item_append(itc, data, self.B)
-            return
-        elif cat == self.C.data['name']:
-            gl.item_append(itc, data, self.C)
-            return
-        elif cat == self.D.data['name']:
-            gl.item_append(itc, data, self.D)
-            return
-        elif cat == self.E.data['name']:
-            gl.item_append(itc, data, self.E)
-            return
-        elif cat == self.F.data['name']:
-            gl.item_append(itc, data, self.F)
-            return
-        elif cat == self.G.data['name']:
-            gl.item_append(itc, data, self.G)
-            return
-        elif cat == self.H.data['name']:
-            gl.item_append(itc, data, self.H)
-            return
-        elif cat == self.I.data['name']:
-            gl.item_append(itc, data, self.I)
-            return
-        elif cat == self.J.data['name']:
-            gl.item_append(itc, data, self.J)
-            return
-        elif cat == self.K.data['name']:
-            gl.item_append(itc, data, self.K)
-            return
-        else:
-            gl.item_append(itc, data, self.L)
+
+        for category in CATNAMES:
+            if cat == "None":
+                cat = "Uncategorized"
+            if category == cat:
+                if CATITM[category]:
+                    break
+            #~ catdata = {'name':'Accessories', 'cat':'Utility;', 'icon':'applications-accessories'}
+                catdata = {'name': category, 'cat': CATDIC[category]}
+                itpc = elm.GenlistItemClass(item_style="default", text_get_func=self.cat_return)
+                CATITM[category] = self.maingl.item_append(itpc, catdata, flags=elm.ELM_GENLIST_ITEM_TREE)
+                break
+
+        #~ for category in CATNAMES:
+            #~ if CATITM[category]:
+                #~ CATITM[category].promote()
+            #~ else:
+                #~ break
+
+
+        exists = False
+        for item in CATLST[cat]:
+            if data['fullpath'] == item['fullpath']:
+                exists = True
+                break
+
+        if not exists:
+            CATLST[cat].append(data)
+
+        for category in CATNAMES:
+            if cat == category:
+                gl.item_append(itc, data, CATITM[cat])
+                CATITM[cat].expanded_set(True)
+                break
+
 
     def name_return(self, obj, part, data ):
-        A = CATNAME[:]
-        B = CATTYPE[:]
         path = data["fullpath"]
         label = self.get_name(path)
         if self.viewcat:
@@ -306,29 +289,31 @@ class Launchers(object):
             cat = "Other"
             with open(path) as deskfile:
                 for x in deskfile:
-                    for i, a in enumerate(A):
-                        b = B[i]
-                        if b in x:
-                            cat = a
+                    if x.startswith("Categories="):
+                        listing = x.split("=")[1].split(";")
+                        for trial in listing:
+                            trial = "%s;"%trial
+                            for category in CATDIC.keys():
+                                if CATDIC[category] == trial:
+                                    cat = category
+                                    break
+                            if cat != "Other" and not "System" in "".join(listing):
+                                break
+                        if "Categories=\n" in x:
+                            cat = "None"
                             break
-                    if "Categories=\n" in x:
-                        cat = "None"
-                        break
         total = label+" - "+cat
         return total
 
     def cat_return(self, obj, part, data ):
-        A = CATNAME[:]
-        B = CATTYPE[:]
-        C = dict(zip(B,A))
         category = data['cat']
         if category == 'None;':
             cat = "None"
         else:
             cat = "Other"
-            for b in B:
-                if b == category:
-                    cat = C[b]
+            for name in CATDIC.keys():
+                if CATDIC[name] == category:
+                    cat = name
                     break
         return cat
 
@@ -1078,11 +1063,21 @@ class Launchers(object):
     def remove_files(self, bt, cancel):
         item = self.maingl.selected_item_get()
         path = item.data["fullpath"]
+
+        for data in CATLST[item.data['type']]:
+            if item.data == data:
+                CATLST[item.data['type']].remove(data)
+                break
+
         self.rmp.delete()
         if cancel:
             return
         elif os.path.exists(path):
             Exe("rm '%s'" %path)
+            for data in CATLST[item.data['type']]:
+                if item.data == data:
+                    CATLST[item.data['type']].remove(data)
+                    break
         item.delete()
 
 
@@ -1100,7 +1095,10 @@ class Launchers(object):
             vbox.pack_end(ib)
             ib.show()
 
-            icon = icon[:-1]
+            try:
+                icon = icon[:-1]
+            except:
+                icon = "none"
             ic = self.ic = elm.Icon(self.win)
             if not ic.standard_set(icon):
                 ic.standard_set("none")
